@@ -182,6 +182,7 @@
     "@metamask/rpc-errors": "^6.2.1",
     "@metamask/scure-bip39": "^2.1.0",
     "@metamask/sdk-communication-layer": "^0.28.1",
+    "@metamask/selected-network-controller": "^15.0.2",
     "@metamask/signature-controller": "^16.0.0",
     "@metamask/slip44": "3.1.0",
     "@metamask/smart-transactions-controller": "11.0.0",
@@ -478,12 +479,14 @@
     "prettier-plugin-gherkin": "^1.1.1",
     "react-dom": "18.2.0",
     "react-native-cli": "2.0.1",
+    "react-native-flipper": "^0.263.0",
     "react-native-launch-arguments": "^4.0.1",
     "react-native-performance": "^5.1.2",
     "react-native-storybook-loader": "^2.0.4",
     "react-native-svg-asset-plugin": "^0.5.0",
     "react-native-svg-transformer": "^1.0.0",
     "react-test-renderer": "18.2.0",
+    "redux-flipper": "^2.0.3",
     "regenerator-runtime": "0.13.9",
     "rn-nodeify": "10.3.0",
     "serve-handler": "^6.1.5",
@@ -495,9 +498,7 @@
     "webpack-cli": "^5.1.4",
     "xhr2": "^0.2.1",
     "xml2js": "^0.5.0",
-    "yarn-deduplicate": "^6.0.2",
-    "redux-flipper": "^2.0.3",
-    "react-native-flipper": "^0.263.0"
+    "yarn-deduplicate": "^6.0.2"
   },
   "config": {
     "react-native-storybook-loader": {
