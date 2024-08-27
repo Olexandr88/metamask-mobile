@@ -1531,6 +1531,7 @@ class Engine {
           'SignatureController:stateChange',
           'SnapController:stateChange',
           'SubjectMetadataController:stateChange',
+          'TokenBalancesController:stateChange',
           'TokenListController:stateChange',
           'TokensController:stateChange',
           'TransactionController:stateChange',
@@ -1554,8 +1555,6 @@ class Engine {
           'PPOMController:stateChange',
           // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
           'SnapsRegistry:stateChange',
-          // @ts-expect-error BaseControllerV2, `TokenBalancesControllerState` import error
-          'TokenBalancesController:stateChange',
           // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
           'UserStorageController:stateChange',
 
