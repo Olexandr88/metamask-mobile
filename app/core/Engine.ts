@@ -68,6 +68,7 @@ import {
   TransactionController,
   TransactionControllerEvents,
   TransactionControllerState,
+  TransactionMeta,
 } from '@metamask/transaction-controller';
 import {
   GasFeeController,
@@ -218,6 +219,7 @@ import { toChecksumHexAddress } from '@metamask/controller-utils';
 import { ExtendedControllerMessenger } from './ExtendedControllerMessenger';
 import EthQuery from '@metamask/eth-query';
 import { TransactionControllerOptions } from '@metamask/transaction-controller/dist/types/TransactionController';
+import { getSmartTransactionMetricsProperties } from '../util/smart-transactions';
 
 const NON_EMPTY = 'NON_EMPTY';
 
@@ -1221,19 +1223,23 @@ class Engine {
       category: string;
       // TODO: Replace "any" with type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sensitiveProperties: any;
+      properties?: any;
+      sensitiveProperties?: any;
     }) => {
-      const { event, category, ...restParams } = params;
-
       MetaMetrics.getInstance().trackEvent(
         {
-          category,
-          properties: {
-            name: event,
-          },
+          category: params.event,
         },
-        restParams,
+        params.properties
       );
+      if (params.sensitiveProperties) {
+        MetaMetrics.getInstance().trackAnonymousEvent(
+          {
+            category: params.event,
+          },
+          params.sensitiveProperties
+        );
+      }
     };
     this.smartTransactionsController = new SmartTransactionsController(
       {
@@ -1559,8 +1565,50 @@ class Engine {
     this.configureControllersOnNetworkChange();
     this.startPolling();
     this.handleVaultBackup();
+    this._addTransactionControllerListeners();
 
     Engine.instance = this;
+  }
+
+  _handleTransactionFinalizedEvent = ( _transactionEventPayload: TransactionMeta, properties: object ) => {
+    MetaMetrics.getInstance().trackEvent(
+      MetaMetricsEvents.TRANSACTION_FINALIZED,
+      {
+        ...properties
+      }
+    )
+  }
+
+  _handleTransactionDropped = ({ transactionMeta }: { transactionMeta: TransactionMeta }) => {
+    const properties = { status: 'dropped' };
+    this._handleTransactionFinalizedEvent(transactionMeta, properties);
+  }
+
+  _handleTransactionConfirmed = (transactionEventPayload: TransactionMeta) => {
+    const properties = { status: 'confirmed' };
+    this._handleTransactionFinalizedEvent(transactionEventPayload, properties);
+  }
+
+  _handleTransactionFailed = (transactionEventPayload: any) => {
+    const properties = { status: 'failed' };
+    this._handleTransactionFinalizedEvent(transactionEventPayload, properties);
+  }
+
+  _addTransactionControllerListeners() {
+    this.controllerMessenger.subscribe(
+      'TransactionController:transactionDropped',
+      this._handleTransactionDropped,
+    );
+
+    this.controllerMessenger.subscribe(
+      'TransactionController:transactionConfirmed',
+      this._handleTransactionConfirmed,
+    );
+
+    this.controllerMessenger.subscribe(
+      'TransactionController:transactionFailed',
+      this._handleTransactionFailed,
+    );
   }
 
   handleVaultBackup() {
