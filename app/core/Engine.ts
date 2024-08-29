@@ -1462,7 +1462,7 @@ class Engine {
         messenger: this.controllerMessenger.getRestricted({
           name: 'PPOMController',
           allowedActions: [],
-          allowedEvents: [`${networkController.name}:stateChange`],
+          allowedEvents: [`${networkController.name}:networkDidChange`],
         }),
         onPreferencesChange: (listener) =>
           this.controllerMessenger.subscribe(
