@@ -3987,7 +3987,7 @@
     "@metamask/utils" "^8.3.0"
     nanoid "^3.1.31"
 
-"@metamask/approval-controller@^7.0.0", "@metamask/approval-controller@^7.0.1", "@metamask/approval-controller@^7.0.2":
+"@metamask/approval-controller@^7.0.0", "@metamask/approval-controller@^7.0.2", "@metamask/approval-controller@^7.0.3":
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/@metamask/approval-controller/-/approval-controller-7.0.3.tgz#0f6cf8e474689c41caae63b4253b0d77b98a3dd7"
   integrity sha512-OJ/VpkmYfqT6xEnIOpTaXmYZQ6DsK8Ovt26AmVTCq4o/uGG6legNr5W6a/hAAx7bWO5BTQbxDXst7eVPxraFjw==
