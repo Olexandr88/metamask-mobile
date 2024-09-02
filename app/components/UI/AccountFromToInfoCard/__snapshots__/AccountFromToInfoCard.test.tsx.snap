@@ -676,6 +676,18 @@ exports[`AccountFromToInfoCard should render correctly 1`] = `
   }
 >
   <Component
+    asset={
+      {
+        "address": "0x26D6C3e7aEFCE970fe3BE5d589DbAbFD30026924",
+        "decimals": 0,
+        "isETH": false,
+        "symbol": "TST",
+        "tokenId": "13764",
+      }
+    }
+    chainId="1"
+    internalAccounts={[]}
+    origin="http://metamask.github.io"
     transactionState={
       {
         "selectedAsset": {
@@ -693,6 +705,7 @@ exports[`AccountFromToInfoCard should render correctly 1`] = `
         "transactionToName": "Account 2",
       }
     }
+    url="http://metamask.github.io"
   />
 </ContextProvider>
 `;

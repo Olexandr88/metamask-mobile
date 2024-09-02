@@ -1,6 +1,7 @@
 import { toChecksumAddress } from 'ethereumjs-util';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { ImageURISource } from 'react-native';
 
 import { strings } from '../../../../../../locales/i18n';
 import TagUrl from '../../../../../component-library/components/Tags/TagUrl';
@@ -99,7 +100,7 @@ const ApprovalTagUrl = ({
     return newOrigin;
   }, [origin, isOriginWalletConnect, isOriginMMSDKRemoteConn]);
 
-  const faviconSource = useFavicon(faviconUpdatedOrigin);
+  const faviconSource = useFavicon(faviconUpdatedOrigin) as ImageURISource;
 
   const imageSource = faviconSource?.uri
     ? faviconSource
