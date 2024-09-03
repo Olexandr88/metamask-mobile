@@ -1,6 +1,7 @@
 import Engine from './Engine';
 import { backgroundState } from '../util/test/initial-root-state';
 import { zeroAddress } from 'ethereumjs-util';
+import { LogType } from '@metamask/logging-controller';
 
 jest.unmock('./Engine');
 jest.mock('../store', () => ({ store: { getState: jest.fn(() => ({})) } }));
@@ -90,6 +91,29 @@ describe('Engine', () => {
           userOptInV2: undefined,
         },
       },
+    });
+  });
+
+  it("updates datamodel state when a controller's state is updated", async () => {
+    const engine = Engine.init({});
+
+    expect(
+      await engine.controllerMessenger.call('LoggingController:add', {
+        type: LogType.GenericLog,
+        data: `Generic log`,
+      }),
+    ).toBeUndefined();
+
+    expect(engine.datamodel.state).toHaveProperty('LoggingController.logs');
+    const logs = Object.values(engine.datamodel.state.LoggingController.logs);
+    expect(logs).toHaveLength(1);
+    expect(Object.values(logs)).toContainEqual({
+      timestamp: expect.any(Number),
+      id: expect.any(String),
+      log: expect.objectContaining({
+        type: LogType.GenericLog,
+        data: 'Generic log',
+      }),
     });
   });
 
