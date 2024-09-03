@@ -197,9 +197,9 @@ describe('AccountFromToInfoCard', () => {
       transactionToName: '0xF4e8263979A89Dc357d7f9F79533Febc7f3e287B',
     };
     const { findByText } = renderWithProvider(
-      // TODO: Replace "any" with type
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       <AccountFromToInfoCard
+        // TODO: Replace "any" with type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         transactionState={NFTTransaction as any}
         {...initialProps}
       />,
@@ -286,9 +286,9 @@ describe('AccountFromToInfoCard', () => {
         },
       };
       const { findByText } = renderWithProvider(
-        // TODO: Replace "any" with type
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         <AccountFromToInfoCard
+          // TODO: Replace "any" with type
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           transactionState={transaction as any}
           {...initialProps}
         />,
