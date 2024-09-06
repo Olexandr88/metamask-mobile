@@ -4047,15 +4047,7 @@
     "@metamask/utils" "^8.3.0"
     immer "^9.0.6"
 
-"@metamask/base-controller@^6.0.0", "@metamask/base-controller@^6.0.1":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@metamask/base-controller/-/base-controller-6.0.2.tgz#710d4a1686616cc66c572099f065ebbfb6dbfcf5"
-  integrity sha512-U6BWN/CLrXvDSsYOpx6QgavZO7XRi6n6zuz4Kqni2Sg2n6R9ixSS8JLZhYUbIBgosTf84tVURaSYsYavX3G5KQ==
-  dependencies:
-    "@metamask/utils" "^9.1.0"
-    immer "^9.0.6"
-
-"@metamask/base-controller@^6.0.3":
+"@metamask/base-controller@^6.0.0", "@metamask/base-controller@^6.0.1", "@metamask/base-controller@^6.0.2":
   version "6.0.3"
   resolved "https://registry.yarnpkg.com/@metamask/base-controller/-/base-controller-6.0.3.tgz#9bb4e74234c1de5f99842c343ffa053c08055db1"
   integrity sha512-neUqsCXRT6QYcZO51y6Y5u9NPTHuxgNsW5Z4h///o1gDdV8lBeIG/b1ne+QPK422DZMAm4ChnkG1DDNf4PkErw==
@@ -4093,12 +4085,12 @@
     "@metamask/utils" "^8.2.0"
     "@types/eslint" "^8.44.7"
 
-"@metamask/composable-controller@^8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@metamask/composable-controller/-/composable-controller-8.0.0.tgz#b4d71c524eab308d01cf45752370d8dd5a94aee6"
-  integrity sha512-11aLRhVCOjaJ+tIxqgqT66Zn9GeYmf7GFX2+Gju0Yd5oghAuGo+yAloc0trEuKJfAbBa4yjMjSyYMwKBr0bHLQ==
+"@metamask/composable-controller@^9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@metamask/composable-controller/-/composable-controller-9.0.0.tgz#3e0cd8b782a3772f7e6f1dc4f4253a7b7e55d9b2"
+  integrity sha512-D1XKK8MkE5g/lzdDpLSiNL1Vp7Y4scKzeScgbQpL4qOcdj/Dx0UQujZ2fjPwkAwto/nwzeFUnZn2Nwj1fhn5lQ==
   dependencies:
-    "@metamask/base-controller" "^6.0.3"
+    "@metamask/base-controller" "^7.0.0"
 
 "@metamask/contract-metadata@^2.1.0", "@metamask/contract-metadata@^2.4.0":
   version "2.2.0"
