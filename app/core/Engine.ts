@@ -33,9 +33,11 @@ import PREINSTALLED_SNAPS from '../lib/snaps/preinstalled-snaps';
 ///: END:ONLY_INCLUDE_IF
 import {
   AddressBookController,
-  AddressBookState,
+  AddressBookControllerActions,
+  AddressBookControllerEvents,
+  AddressBookControllerState,
 } from '@metamask/address-book-controller';
-import { BaseState } from '@metamask/base-controller';
+import { BaseState, Listener } from '@metamask/base-controller';
 import { ComposableController } from '@metamask/composable-controller';
 import {
   KeyringController,
@@ -56,6 +58,7 @@ import {
 import {
   PhishingController,
   PhishingControllerActions,
+  PhishingControllerEvents,
   PhishingControllerState,
 } from '@metamask/phishing-controller';
 import {
@@ -177,7 +180,10 @@ import {
   AuthenticationController,
   UserStorageController,
 } from '@metamask/profile-sync-controller';
-import { NotificationServicesController } from '@metamask/notification-services-controller';
+import {
+  NotificationServicesController,
+  NotificationServicesPushController,
+} from '@metamask/notification-services-controller';
 ///: END:ONLY_INCLUDE_IF
 import {
   getCaveatSpecifications,
@@ -214,9 +220,17 @@ import SmartTransactionsController from '@metamask/smart-transactions-controller
 import { getAllowedSmartTransactionsChainIds } from '../../app/constants/smartTransactions';
 import { selectShouldUseSmartTransaction } from '../selectors/smartTransactionsController';
 import { selectSwapsChainFeatureFlags } from '../reducers/swaps';
-import { SmartTransactionStatuses } from '@metamask/smart-transactions-controller/dist/types';
+import {
+  MetaMetricsEventCategory,
+  MetaMetricsEventName,
+} from '@metamask/smart-transactions-controller/dist/constants';
+import type { SmartTransactionStatuses } from '@metamask/smart-transactions-controller/dist/types';
 import { submitSmartTransactionHook } from '../util/smart-transactions/smart-publish-hook';
-import { SmartTransactionsControllerState } from '@metamask/smart-transactions-controller/dist/SmartTransactionsController';
+import SmartTransactionsController, {
+  SmartTransactionsControllerEvents,
+  type SmartTransactionsControllerActions,
+  type SmartTransactionsControllerState,
+} from '@metamask/smart-transactions-controller';
 import { zeroAddress } from 'ethereumjs-util';
 import { toChecksumHexAddress } from '@metamask/controller-utils';
 import { ExtendedControllerMessenger } from './ExtendedControllerMessenger';
@@ -1247,11 +1261,11 @@ class Engine {
     const codefiTokenApiV2 = new CodefiTokenPricesServiceV2();
 
     const smartTransactionsControllerTrackMetaMetricsEvent = (params: {
-      event: string;
-      category: string;
+      event: MetaMetricsEventName;
+      category: MetaMetricsEventCategory;
       // TODO: Replace "any" with type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      sensitiveProperties: any;
+      sensitiveProperties?: any;
     }) => {
       const { event, category, ...restParams } = params;
 
@@ -1265,45 +1279,54 @@ class Engine {
         restParams,
       );
     };
-    this.smartTransactionsController = new SmartTransactionsController(
-      {
-        confirmExternalTransaction:
-          this.transactionController.confirmExternalTransaction.bind(
-            this.transactionController,
-          ),
-        getNetworkClientById:
-          networkController.getNetworkClientById.bind(networkController),
-        getNonceLock: this.transactionController.getNonceLock.bind(
+    this.smartTransactionsController = new SmartTransactionsController({
+      state: initialState.SmartTransactionsController,
+      // @ts-expect-error TODO: Resolve base-controller version mismatch
+      messenger: this.controllerMessenger.getRestricted({
+        name: 'SmartTransactionController',
+        allowedActions: ['NetworkController:getNetworkClientById'],
+        allowedEvents: ['NetworkController:stateChange'],
+      }),
+      confirmExternalTransaction:
+        this.transactionController.confirmExternalTransaction.bind(
           this.transactionController,
         ),
-        getTransactions: this.transactionController.getTransactions.bind(
-          this.transactionController,
+      getNetworkClientById:
+        networkController.getNetworkClientById.bind(networkController),
+      getNonceLock: this.transactionController.getNonceLock.bind(
+        this.transactionController,
+      ),
+      getTransactions: this.transactionController.getTransactions.bind(
+        this.transactionController,
+      ),
+      onNetworkStateChange: (listener: Listener<NetworkState>) =>
+        this.controllerMessenger.subscribe(
+          AppConstants.NETWORK_STATE_CHANGE_EVENT,
+          listener,
         ),
-        onNetworkStateChange: (listener) =>
-          this.controllerMessenger.subscribe(
-            AppConstants.NETWORK_STATE_CHANGE_EVENT,
-            listener,
-          ),
 
-        // TODO: Replace "any" with type
-        provider:
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          networkController.getProviderAndBlockTracker().provider as any,
+      // TODO: Replace "any" with type
+      provider:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        networkController.getProviderAndBlockTracker().provider as any,
 
-        trackMetaMetricsEvent: smartTransactionsControllerTrackMetaMetricsEvent,
-        getMetaMetricsProps: () => Promise.resolve({}), // Return MetaMetrics props once we enable HW wallets for smart transactions.
-      },
-      {
-        // @ts-expect-error TODO: resolve types
-        supportedChainIds: getAllowedSmartTransactionsChainIds(),
-      },
-      initialState.SmartTransactionsController,
-    );
+      trackMetaMetricsEvent: smartTransactionsControllerTrackMetaMetricsEvent,
+      getMetaMetricsProps: () => Promise.resolve({}), // Return MetaMetrics props once we enable HW wallets for smart transactions.
+      // @ts-expect-error TODO: resolve types
+      supportedChainIds: getAllowedSmartTransactionsChainIds(),
+    });
 
     const controllers: Controllers[keyof Controllers][] = [
       keyringController,
       accountTrackerController,
-      new AddressBookController(),
+      new AddressBookController({
+        // @ts-expect-error TODO: Resolve base-controller version mismatch
+        messenger: this.controllerMessenger.getRestricted({
+          name: 'AddressBookController',
+          allowedActions: [],
+          allowedEvents: [],
+        }),
+      }),
       assetsContractController,
       nftController,
       tokensController,
