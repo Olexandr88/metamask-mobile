@@ -1,20 +1,18 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
 import Button, {
   ButtonSize,
   ButtonVariants,
   ButtonWidthTypes,
 } from '../../../../../component-library/components/Buttons/Button';
-import Icon, {
-  IconName,
-} from '../../../../../component-library/components/Icons/Icon';
 import Keypad from '../../../../Base/Keypad';
 import { useStyles } from '../../../../hooks/useStyles';
 import { getStakeInputNavbar } from '../../../Navbar';
 import ScreenLayout from '../../../Ramp/components/ScreenLayout';
-import AnnualRewardsRate from '../../components/AnnualRewardsRate';
+import AnnualRewardsRateCard from '../../components/AnnualRewardsRateCard';
+import CurrencySwitch from '../../components/CurrencySwitch';
 import QuickAmounts from '../../components/QuickAmounts';
 import styleSheet from './StakeInputView.styles';
 
@@ -77,31 +75,24 @@ const StakeInputView = () => {
           <Text style={styles.currencyText}>{isUsd ? 'USD' : 'ETH'}</Text>
         </View>
         <View style={styles.currencySwitch}>
-          <TouchableOpacity
-            style={styles.actionSwitch}
-            onPress={handleCurrencySwitch}
-          >
-            <Text style={styles.switchText}>{isUsd ? 'USD' : 'ETH'}</Text>
-            <Icon
-              name={IconName.SwapVertical}
-              color={theme.colors.primary.default}
-            />
-          </TouchableOpacity>
+          <CurrencySwitch isUsd={isUsd} onPress={handleCurrencySwitch} />
         </View>
       </View>
       <View style={styles.rewardsRateContainer}>
-        <AnnualRewardsRate />
+        <AnnualRewardsRateCard annualRewardRate="2.6%" />
       </View>
-      <View>
+      <View style={styles.keypadContainer}>
         <QuickAmounts
           disabled={false}
           amounts={percentageOptions}
           onAmountPress={handleAmountPress}
         />
 
-        <View style={styles.keypad}>
-          <Keypad value={amount} onChange={handleKeypadChange} />
-        </View>
+        <Keypad
+          value={amount}
+          onChange={handleKeypadChange}
+          style={styles.keypad}
+        />
       </View>
 
       <View style={styles.buttonNextWrapper}>

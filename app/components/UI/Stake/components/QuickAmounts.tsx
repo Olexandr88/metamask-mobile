@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Icon, {
-  IconColor,
   IconName,
   IconSize,
 } from '../../../../component-library/components/Icons/Icon';
@@ -16,14 +15,17 @@ const createStyles = (colors: Colors) =>
     content: {
       backgroundColor: colors.background.default,
       paddingVertical: 12,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     amount: {
       borderRadius: 999,
       borderWidth: 1,
       borderColor: colors.background.alternative,
       backgroundColor: colors.background.alternative,
-      marginRight: 5,
       minWidth: 78,
+      marginRight: 7,
       padding: 7,
       flexDirection: 'row',
       justifyContent: 'center',
@@ -61,7 +63,7 @@ const Amount = ({ amount, onPress, ...props }: AmountProps) => {
       {value === 1 && isNative ? (
         <Icon
           name={IconName.Sparkle}
-          color={IconColor.Default}
+          color={colors.primary.default}
           size={IconSize.Sm}
         />
       ) : null}

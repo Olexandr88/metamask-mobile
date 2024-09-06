@@ -1832,7 +1832,6 @@ export function getStakeInputNavbar(navigation, themeColors) {
     ),
     headerLeft: () => <View />,
     headerRight: () => (
-      // eslint-disable-next-line react/jsx-no-bind
       <TouchableOpacity
         onPress={() => navigation.dangerouslyGetParent()?.pop()}
         style={styles.closeButton}

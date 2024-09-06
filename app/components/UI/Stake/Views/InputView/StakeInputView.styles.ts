@@ -67,12 +67,18 @@ const styleSheet = (params: { theme: Theme }) => {
       fontSize: 18,
       color: colors.text.alternative,
     },
+    keypadContainer: {
+      paddingTop: 16,
+    },
     keypad: {
       marginBottom: 0,
       padding: 8, // Added padding around the keypad
     },
     rewardsRateContainer: {
-      marginBottom: 20,
+      padding: 16,
+      paddingBottom: 0,
+      borderColor: colors.border.muted,
+      height: 66,
     },
     buttonNextWrapper: {
       paddingHorizontal: 20,
