@@ -216,7 +216,6 @@ import {
   networkIdUpdated,
   networkIdWillUpdate,
 } from '../core/redux/slices/inpageProvider';
-import SmartTransactionsController from '@metamask/smart-transactions-controller';
 import { getAllowedSmartTransactionsChainIds } from '../../app/constants/smartTransactions';
 import { selectShouldUseSmartTransaction } from '../selectors/smartTransactionsController';
 import { selectSwapsChainFeatureFlags } from '../reducers/swaps';
@@ -264,22 +263,18 @@ type SnapsGlobalEvents =
   | SnapControllerEvents
   | SnapsRegistryEvents
   | SubjectMetadataControllerEvents
-  // TODO: uncomment once `Events` type is added to `PhishingController`
-  // | PhishingControllerEvents
+  | PhishingControllerEvents
   | SnapsAllowedEvents;
 ///: END:ONLY_INCLUDE_IF
 
 type GlobalActions =
   // TODO: uncomment once `AccountTrackerController` is upgraded to V2
   // | AccountTrackerControllerActions
-  // TODO: uncomment once `AddressBookController` is upgraded to V2
-  // | AddressBookControllerActions
   // TODO: uncomment once `NftController` is upgraded to V2
   // | NftControllerActions
-  // TODO: uncomment once `SmartTransactionController` is upgraded to V2
-  // | SmartTransactionControllerActions
   // TODO: uncomment once `SwapsController` is upgraded to V2
   // | SwapsControllerActions
+  | AddressBookControllerActions
   | ApprovalControllerActions
   | CurrencyRateControllerActions
   | GasFeeControllerActions
@@ -293,6 +288,7 @@ type GlobalActions =
   | AuthenticationController.Actions
   | UserStorageController.Actions
   | NotificationServicesController.Actions
+  | NotificationServicesPushController.Actions
   ///: END:ONLY_INCLUDE_IF
   | AccountsControllerActions
   | PreferencesControllerActions
@@ -300,25 +296,17 @@ type GlobalActions =
   | TokenBalancesControllerActions
   | TokensControllerActions
   | TokenListControllerActions
-  | TransactionControllerActions;
+  | TransactionControllerActions
+  | SmartTransactionsControllerActions;
 
 type GlobalEvents =
   // TODO: uncomment once `AccountTrackerController` is upgraded to V2
   // | AccountTrackerControllerEvents
-  // TODO: uncomment once `AddressBookController` is upgraded to V2
-  // | AddressBookControllerEvents
   // TODO: uncomment once `NftController` is upgraded to V2
   // | NftControllerEvents
-  // TODO: uncomment once `SmartTransactionController` is upgraded to V2
-  // | SmartTransactionControllerEvents
   // TODO: uncomment once `SwapsController` is upgraded to V2
   // | SwapsControllerEvents
-  // TODO: uncomment once `Events` type is added to `AuthenticationController`
-  // | AuthenticationController.Events
-  // TODO: uncomment once `Events` type is added to `UserStorageController`
-  // | UserStorageController.Events
-  // TODO: uncomment once `Events` type is added to `NotificationServicesPushController`
-  // | NotificationsServicesPushController.Events
+  | AddressBookControllerEvents
   | ApprovalControllerEvents
   | CurrencyRateControllerEvents
   | GasFeeControllerEvents
@@ -327,6 +315,10 @@ type GlobalEvents =
   | PermissionControllerEvents
   ///: BEGIN:ONLY_INCLUDE_IF(preinstalled-snaps,external-snaps)
   | SnapsGlobalEvents
+  | AuthenticationController.Events
+  | UserStorageController.Events
+  | NotificationServicesController.Events
+  | NotificationServicesPushController.Events
   ///: END:ONLY_INCLUDE_IF
   | SignatureControllerEvents
   | LoggingControllerEvents
@@ -336,7 +328,8 @@ type GlobalEvents =
   | TokenBalancesControllerEvents
   | TokensControllerEvents
   | TokenListControllerEvents
-  | TransactionControllerEvents;
+  | TransactionControllerEvents
+  | SmartTransactionsControllerEvents;
 
 type PermissionsByRpcMethod = ReturnType<typeof getPermissionSpecifications>;
 type Permissions = PermissionsByRpcMethod[keyof PermissionsByRpcMethod];
@@ -346,7 +339,7 @@ type Permissions = PermissionsByRpcMethod[keyof PermissionsByRpcMethod];
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type EngineState = {
   AccountTrackerController: AccountTrackerState;
-  AddressBookController: AddressBookState;
+  AddressBookController: AddressBookControllerState;
   AssetsContractController: BaseState;
   NftController: NftState;
   TokenListController: TokenListState;
@@ -1557,45 +1550,38 @@ class Engine {
            * V1/V2 controllers with correctly defined messengers and `stateChange` events.
            */
           'AccountsController:stateChange',
+          'AddressBookController:stateChange',
           'ApprovalController:stateChange',
+          'AuthenticationController:stateChange',
           'CurrencyRateController:stateChange',
           'GasFeeController:stateChange',
           'KeyringController:stateChange',
           'LoggingController:stateChange',
           'NetworkController:stateChange',
+          'NotificationServicesController:stateChange',
+          'NotificationServicesPushController:stateChange',
           'PermissionController:stateChange',
+          'PhishingController:stateChange',
           'PPOMController:stateChange',
           'PreferencesController:stateChange',
           'SignatureController:stateChange',
+          'SmartTransactionsController:stateChange',
           'SnapController:stateChange',
+          'SnapsRegistry:stateChange',
           'SubjectMetadataController:stateChange',
           'TokenBalancesController:stateChange',
           'TokenListController:stateChange',
           'TokensController:stateChange',
           'TransactionController:stateChange',
+          'UserStorageController:stateChange',
 
           /**
            * V1/V2 controllers incorrectly defined with a `messagingSystem` that is missing its `stateChange` event.
            * These `stateChange` events must be included in the datamodel's events allowlist.
            */
-          // TODO: Remove `ts-expect-error` directive once `AuthenticationController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
-          // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
-          'AuthenticationController:stateChange',
           // TODO: Remove `ts-expect-error` directive once `NftController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
           // @ts-expect-error BaseControllerV1, has `messagingSystem` but as private field, messenger defined without `stateChange` event type
           'NftController:stateChange',
-          // TODO: Remove `ts-expect-error` directive once `NotificationServicesController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
-          // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
-          'NotificationServicesController:stateChange',
-          // TODO: Remove `ts-expect-error` directive once `PhishingController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
-          // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
-          'PhishingController:stateChange',
-          // TODO: Remove `ts-expect-error` directive once `SnapsRegistry` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
-          // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
-          'SnapsRegistry:stateChange',
-          // TODO: Remove `ts-expect-error` directive once `UserStorageController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
-          // @ts-expect-error BaseControllerV2, messenger defined without `stateChange` event type
-          'UserStorageController:stateChange',
 
           /**
            * V1 controllers that should be excluded from the datamodel's events allowlist for now.
@@ -1603,10 +1589,6 @@ class Engine {
            */
           // TODO: uncomment once `AccountTrackerController` is migrated to V2 and the `stateChange` event is added to its `messagingSystem`.
           // 'AccountTrackerController:stateChange', // StaticIntervalPollingControllerV1, no `messagingSystem`
-          // TODO: uncomment once `AddressBookController` is migrated to V2 and the `stateChange` event is added to its `messagingSystem`.
-          // 'AddressBookController:stateChange', // BaseControllerV1, no `messagingSystem`
-          // TODO: uncomment once `SmartTransactionsController` is migrated to V2 and the `stateChange` event is added to its `messagingSystem`.
-          // 'SmartTransactionsController:stateChange', // StaticIntervalPollingControllerV1, no `messagingSystem`
           // TODO: uncomment once `SwapsController` is migrated to V2 and the `stateChange` event is added to its `messagingSystem`.
           // 'SwapsController:stateChange', // BaseControllerV1, no `messagingSystem`
           // TODO: uncomment once `TokenRatesController` is migrated to V2 and the `stateChange` event is added to its `messagingSystem`.
