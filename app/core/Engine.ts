@@ -37,7 +37,7 @@ import {
   AddressBookControllerEvents,
   AddressBookControllerState,
 } from '@metamask/address-book-controller';
-import { BaseState, Listener } from '@metamask/base-controller';
+import { BaseState } from '@metamask/base-controller';
 import { ComposableController } from '@metamask/composable-controller';
 import {
   KeyringController,
@@ -216,20 +216,13 @@ import {
   networkIdUpdated,
   networkIdWillUpdate,
 } from '../core/redux/slices/inpageProvider';
+import SmartTransactionsController from '@metamask/smart-transactions-controller';
 import { getAllowedSmartTransactionsChainIds } from '../../app/constants/smartTransactions';
 import { selectShouldUseSmartTransaction } from '../selectors/smartTransactionsController';
 import { selectSwapsChainFeatureFlags } from '../reducers/swaps';
-import {
-  MetaMetricsEventCategory,
-  MetaMetricsEventName,
-} from '@metamask/smart-transactions-controller/dist/constants';
-import type { SmartTransactionStatuses } from '@metamask/smart-transactions-controller/dist/types';
+import { SmartTransactionStatuses } from '@metamask/smart-transactions-controller/dist/types';
 import { submitSmartTransactionHook } from '../util/smart-transactions/smart-publish-hook';
-import SmartTransactionsController, {
-  SmartTransactionsControllerEvents,
-  type SmartTransactionsControllerActions,
-  type SmartTransactionsControllerState,
-} from '@metamask/smart-transactions-controller';
+import { SmartTransactionsControllerState } from '@metamask/smart-transactions-controller/dist/SmartTransactionsController';
 import { zeroAddress } from 'ethereumjs-util';
 import { toChecksumHexAddress } from '@metamask/controller-utils';
 import { ExtendedControllerMessenger } from './ExtendedControllerMessenger';
@@ -272,6 +265,8 @@ type GlobalActions =
   // | AccountTrackerControllerActions
   // TODO: uncomment once `NftController` is upgraded to V2
   // | NftControllerActions
+  // TODO: uncomment once `SmartTransactionsController` is upgraded to V2
+  // | SmartTransactionsControllerActions
   // TODO: uncomment once `SwapsController` is upgraded to V2
   // | SwapsControllerActions
   | AddressBookControllerActions
@@ -296,14 +291,15 @@ type GlobalActions =
   | TokenBalancesControllerActions
   | TokensControllerActions
   | TokenListControllerActions
-  | TransactionControllerActions
-  | SmartTransactionsControllerActions;
+  | TransactionControllerActions;
 
 type GlobalEvents =
   // TODO: uncomment once `AccountTrackerController` is upgraded to V2
   // | AccountTrackerControllerEvents
   // TODO: uncomment once `NftController` is upgraded to V2
   // | NftControllerEvents
+  // TODO: uncomment once `SmartTransactionsController` is upgraded to V2
+  // | SmartTransactionsControllerEvents
   // TODO: uncomment once `SwapsController` is upgraded to V2
   // | SwapsControllerEvents
   | AddressBookControllerEvents
@@ -328,8 +324,7 @@ type GlobalEvents =
   | TokenBalancesControllerEvents
   | TokensControllerEvents
   | TokenListControllerEvents
-  | TransactionControllerEvents
-  | SmartTransactionsControllerEvents;
+  | TransactionControllerEvents;
 
 type PermissionsByRpcMethod = ReturnType<typeof getPermissionSpecifications>;
 type Permissions = PermissionsByRpcMethod[keyof PermissionsByRpcMethod];
@@ -1254,8 +1249,8 @@ class Engine {
     const codefiTokenApiV2 = new CodefiTokenPricesServiceV2();
 
     const smartTransactionsControllerTrackMetaMetricsEvent = (params: {
-      event: MetaMetricsEventName;
-      category: MetaMetricsEventCategory;
+      event: string;
+      category: string;
       // TODO: Replace "any" with type
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sensitiveProperties?: any;
@@ -1272,42 +1267,40 @@ class Engine {
         restParams,
       );
     };
-    this.smartTransactionsController = new SmartTransactionsController({
-      state: initialState.SmartTransactionsController,
-      // @ts-expect-error TODO: Resolve base-controller version mismatch
-      messenger: this.controllerMessenger.getRestricted({
-        name: 'SmartTransactionController',
-        allowedActions: ['NetworkController:getNetworkClientById'],
-        allowedEvents: ['NetworkController:stateChange'],
-      }),
-      confirmExternalTransaction:
-        this.transactionController.confirmExternalTransaction.bind(
+    this.smartTransactionsController = new SmartTransactionsController(
+      {
+        confirmExternalTransaction:
+          this.transactionController.confirmExternalTransaction.bind(
+            this.transactionController,
+          ),
+        getNetworkClientById:
+          networkController.getNetworkClientById.bind(networkController),
+        getNonceLock: this.transactionController.getNonceLock.bind(
           this.transactionController,
         ),
-      getNetworkClientById:
-        networkController.getNetworkClientById.bind(networkController),
-      getNonceLock: this.transactionController.getNonceLock.bind(
-        this.transactionController,
-      ),
-      getTransactions: this.transactionController.getTransactions.bind(
-        this.transactionController,
-      ),
-      onNetworkStateChange: (listener: Listener<NetworkState>) =>
-        this.controllerMessenger.subscribe(
-          AppConstants.NETWORK_STATE_CHANGE_EVENT,
-          listener,
+        getTransactions: this.transactionController.getTransactions.bind(
+          this.transactionController,
         ),
+        onNetworkStateChange: (listener) =>
+          this.controllerMessenger.subscribe(
+            AppConstants.NETWORK_STATE_CHANGE_EVENT,
+            listener,
+          ),
 
-      // TODO: Replace "any" with type
-      provider:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        networkController.getProviderAndBlockTracker().provider as any,
+        // TODO: Replace "any" with type
+        provider:
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          networkController.getProviderAndBlockTracker().provider as any,
 
-      trackMetaMetricsEvent: smartTransactionsControllerTrackMetaMetricsEvent,
-      getMetaMetricsProps: () => Promise.resolve({}), // Return MetaMetrics props once we enable HW wallets for smart transactions.
-      // @ts-expect-error TODO: resolve types
-      supportedChainIds: getAllowedSmartTransactionsChainIds(),
-    });
+        trackMetaMetricsEvent: smartTransactionsControllerTrackMetaMetricsEvent,
+        getMetaMetricsProps: () => Promise.resolve({}), // Return MetaMetrics props once we enable HW wallets for smart transactions.
+      },
+      {
+        // @ts-expect-error TODO: resolve types
+        supportedChainIds: getAllowedSmartTransactionsChainIds(),
+      },
+      initialState.SmartTransactionsController,
+    );
 
     const controllers: Controllers[keyof Controllers][] = [
       keyringController,
@@ -1565,7 +1558,6 @@ class Engine {
           'PPOMController:stateChange',
           'PreferencesController:stateChange',
           'SignatureController:stateChange',
-          'SmartTransactionsController:stateChange',
           'SnapController:stateChange',
           'SnapsRegistry:stateChange',
           'SubjectMetadataController:stateChange',
@@ -1582,6 +1574,8 @@ class Engine {
           // TODO: Remove `ts-expect-error` directive once `NftController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
           // @ts-expect-error BaseControllerV1, has `messagingSystem` but as private field, messenger defined without `stateChange` event type
           'NftController:stateChange',
+          // @ts-expect-error TODO: Remove once `SmartTransactionsController` is upgraded to V2.
+          'SmartTransactionsController:stateChange',
 
           /**
            * V1 controllers that should be excluded from the datamodel's events allowlist for now.
