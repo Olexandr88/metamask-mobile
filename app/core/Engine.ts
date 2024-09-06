@@ -718,7 +718,6 @@ class Engine {
     });
 
     const phishingController = new PhishingController({
-      // @ts-expect-error TODO: Resolve mismatch between base-controller versions.
       messenger: this.controllerMessenger.getRestricted({
         name: 'PhishingController',
         allowedActions: [],
@@ -1306,7 +1305,6 @@ class Engine {
       keyringController,
       accountTrackerController,
       new AddressBookController({
-        // @ts-expect-error TODO: Resolve base-controller version mismatch
         messenger: this.controllerMessenger.getRestricted({
           name: 'AddressBookController',
           allowedActions: [],
@@ -1559,7 +1557,6 @@ class Engine {
           'PreferencesController:stateChange',
           'SignatureController:stateChange',
           'SnapController:stateChange',
-          'SnapsRegistry:stateChange',
           'SubjectMetadataController:stateChange',
           'TokenBalancesController:stateChange',
           'TokenListController:stateChange',
@@ -1574,6 +1571,8 @@ class Engine {
           // TODO: Remove `ts-expect-error` directive once `NftController` is upgraded to a version that fixes its `messagingSystem` and `stateChange` event.
           // @ts-expect-error BaseControllerV1, has `messagingSystem` but as private field, messenger defined without `stateChange` event type
           'NftController:stateChange',
+          // @ts-expect-error TODO: Remove once this event is added to `GlobalEvents`
+          'SnapsRegistry:stateChange',
           // @ts-expect-error TODO: Remove once `SmartTransactionsController` is upgraded to V2.
           'SmartTransactionsController:stateChange',
 
